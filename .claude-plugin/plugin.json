@@ -1,0 +1,6 @@
+{
+  "name": "decision-alert",
+  "version": "0.1.0",
+  "description": "Native macOS popup when a Claude session needs your decision: answer AskUserQuestion with arrow keys + Enter, or allow/deny permission requests, and jump back to the right session.",
+  "license": "MIT"
+}
