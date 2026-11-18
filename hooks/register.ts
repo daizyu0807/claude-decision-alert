@@ -86,6 +86,11 @@ function ask(argv) {
   else if (mode === 'perm') buttons = ['允許', '拒絕', '回到 session'];
   else buttons = ['確定', '回到 session'];
   buttons.forEach(function (t) { a.addButtonWithTitle($(t)); });
+  if (mode === 'perm' && argv[3] === 'back') {
+    var bs = a.buttons;
+    bs.objectAtIndex(0).setKeyEquivalent($(''));
+    bs.objectAtIndex(2).setKeyEquivalent($('\\r'));
+  }
   app.activateIgnoringOtherApps(true);
   if (matrix) { a.layout; a.window.setInitialFirstResponder(matrix); a.window.makeFirstResponder(matrix); }
   var r = a.runModal - 1000;
@@ -144,9 +149,11 @@ export const register: Register = on => {
     // 這兩個工具的對話框本身就是互動（問題／計畫確認），不是權限；AskUserQuestion 由下方 tool.call 處理
     if (e.tool_name === 'AskUserQuestion' || e.tool_name === 'ExitPlanMode') return next(e)
     const head = `${basename(e.cwd)}｜需要你的許可${e.agent_id ? '（子代理）' : ''}`
+    // 終端機指令常被「shell 指令規則」強制人工確認，hook 的允許會被系統忽略（11-19 紀錄證實）→ 預設回 session
+    const note = e.tool_name === 'mcp__terminal__run_in_terminal' ? '\n\n（終端機指令可能需到 session 內確認；按 Enter 回到 session）' : ''
     try {
       const r = await $.process.run(
-        ['osascript', '-l', 'JavaScript', '-e', JXA, 'perm', head, describe(e.tool_name, e.tool_input)],
+        ['osascript', '-l', 'JavaScript', '-e', JXA, 'perm', head, describe(e.tool_name, e.tool_input) + note, ...(note ? ['back'] : [])],
         { timeoutMs: 120_000 },
       )
       const a = out(r)
