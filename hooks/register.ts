@@ -86,11 +86,6 @@ function ask(argv) {
   else if (mode === 'perm') buttons = ['允許', '拒絕', '回到 session'];
   else buttons = ['確定', '回到 session'];
   buttons.forEach(function (t) { a.addButtonWithTitle($(t)); });
-  if (mode === 'perm') {
-    var bs = a.buttons;
-    bs.objectAtIndex(0).setKeyEquivalent($(''));
-    bs.objectAtIndex(2).setKeyEquivalent($('\\r'));
-  }
   app.activateIgnoringOtherApps(true);
   if (matrix) { a.layout; a.window.setInitialFirstResponder(matrix); a.window.makeFirstResponder(matrix); }
   var r = a.runModal - 1000;
