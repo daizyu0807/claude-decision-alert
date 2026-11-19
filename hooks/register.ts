@@ -86,9 +86,30 @@ function ask(argv) {
   else if (mode === 'perm') buttons = ['允許', '拒絕', '回到 session'];
   else buttons = ['確定', '回到 session'];
   buttons.forEach(function (t) { a.addButtonWithTitle($(t)); });
+  var chk = null, autoFile = $.NSHomeDirectory().js + '/.config/decision-alert/auto-allow';
+  if (mode === 'perm') {
+    chk = $.NSButton.alloc.initWithFrame($.NSMakeRect(0, 0, W, 22));
+    chk.setButtonType(3); chk.setTitle($('5 秒後自動允許'));
+    var saved = $.NSString.stringWithContentsOfFileEncodingError($(autoFile), $.NSUTF8StringEncoding, null);
+    chk.setState(saved && saved.js.trim() === '1' ? 1 : 0);
+    a.setAccessoryView(chk);
+    var left = 5, allowBtn = a.buttons.objectAtIndex(0);
+    ObjC.registerSubclass({ name: 'DATick', methods: { 'tick:': { types: ['void', ['id']], implementation: function (t) {
+      if (chk.state != 1) { left = 5; allowBtn.setTitle($('允許')); return; }
+      left--;
+      if (left <= 0) { $.NSApp.stopModalWithCode(1000); return; }
+      allowBtn.setTitle($('允許 (' + left + ')'));
+    } } } });
+    var timer = $.NSTimer.timerWithTimeIntervalTargetSelectorUserInfoRepeats(1, $.DATick.alloc.init, 'tick:', null, true);
+    $.NSRunLoop.currentRunLoop.addTimerForMode(timer, $.NSRunLoopCommonModes);
+  }
   app.activateIgnoringOtherApps(true);
   if (matrix) { a.layout; a.window.setInitialFirstResponder(matrix); a.window.makeFirstResponder(matrix); }
   var r = a.runModal - 1000;
+  if (chk) {
+    $.NSFileManager.defaultManager.createDirectoryAtPathWithIntermediateDirectoriesAttributesError($.NSHomeDirectory().js + '/.config/decision-alert', true, $(), null);
+    $(chk.state == 1 ? '1' : '0').writeToFileAtomicallyEncodingError($(autoFile), true, $.NSUTF8StringEncoding, null);
+  }
   if (r < 0 || r >= buttons.length) return '回到 session';
   var picked = buttons[r];
   if (mode === 'multi') {
