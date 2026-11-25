@@ -34,6 +34,7 @@ In the desktop app, where `/plugin` does not run: click **+** next to the prompt
 
 - The "back to session" jump looks up the session's id in the Claude desktop app's local session store (`~/Library/Application Support/Claude/claude-code-sessions`). It only reads that folder and opens a `claude://` link.
 - UI labels are in Traditional Chinese; edit `hooks/register.ts` to change them.
+- Why it is built on hooks, and what I tried in other environments (terminals, another desktop app): [docs/approval-popup-notes.md](docs/approval-popup-notes.md). Approach notes only; no code for those.
 
 ## License
 
