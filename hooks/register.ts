@@ -149,6 +149,10 @@ const backToSession = async ($: Dollar) => {
   }
 }
 
+// tool.check 已彈過窗又選「回到 session」的呼叫，PermissionRequest 不要再彈第二次
+const handledAsk = new Set<string>()
+const askKey = (tool: string, input: unknown) => tool + JSON.stringify(input ?? null)
+
 const basename = (p: string) => p.split('/').filter(Boolean).pop() ?? p
 
 const out = (r: { stdout: string; stderr: string }) => r.stdout.trim() || r.stderr.trim()
@@ -164,6 +168,7 @@ export const register: Register = on => {
   on('classic.PermissionRequest', async ($, e, next) => {
     // 這兩個工具的對話框本身就是互動（問題／計畫確認），不是權限；AskUserQuestion 由下方 tool.call 處理
     if (e.tool_name === 'AskUserQuestion' || e.tool_name === 'ExitPlanMode') return next(e)
+    if (handledAsk.delete(askKey(e.tool_name, e.tool_input))) return next(e)
     const head = `${basename(e.cwd)}｜需要你的許可${e.agent_id ? '（子代理）' : ''}`
     try {
       const r = await $.process.run(
@@ -178,6 +183,30 @@ export const register: Register = on => {
     }
     await backToSession($)
     return next(e)
+  })
+
+  // 設定裡的 PreToolUse hook／ask 規則要你確認時（例如終端機指令的「鉤子要求確認此工具」卡片），
+  // 走的是 tool.check 的 ask，PermissionRequest 不一定觸發。這裡在彈窗按「允許／拒絕」就直接定案。
+  // 回到 session、逾時、出錯 → 維持原本的 ask（由原本對話框處理）。
+  on('tool.check', async ($, e, next) => {
+    const r = await next(e)
+    if (r.decision !== 'ask' || !e.tool_use_id || e.approver !== 'person') return r
+    if (e.tool === 'AskUserQuestion' || e.tool === 'ExitPlanMode') return r
+    try {
+      const cwd = await $.session.cwd()
+      const res = await $.process.run(
+        ['osascript', '-l', 'JavaScript', '-e', JXA, 'perm', `${basename(cwd)}｜需要你的許可`, describe(e.tool, e.input)],
+        { timeoutMs: 120_000 },
+      )
+      const a = out(res)
+      if (a === '允許') return { ...r, decision: 'allow' as const, reason: '使用者在 decision-alert 彈窗允許' }
+      if (a === '拒絕') return { ...r, decision: 'deny' as const, reason: '使用者在 decision-alert 彈窗拒絕' }
+    } catch {
+      /* 維持原本的 ask */
+    }
+    handledAsk.add(askKey(e.tool, e.input))
+    await backToSession($)
+    return r
   })
 
   // 自動模式下最常見的「需要判斷」：模型用 AskUserQuestion 問你。
