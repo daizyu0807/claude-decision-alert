@@ -1,5 +1,7 @@
 # Background: native approval popups for AI coding tools, four attempts
 
+English | [繁體中文](approval-popup-notes.zh-TW.md)
+
 AI coding tools stop and ask before they run a command or edit a file. When several of them run at once, in terminal panes or desktop app sessions, those prompts sit unnoticed. The work is blocked and nobody knows.
 
 I wanted one thing: a native macOS window that appears on top of whatever I am doing, shows what is being asked, and sends my answer back to the session that asked.
