@@ -17,16 +17,38 @@ The popup is the easy part and it is the same everywhere. What differs in every 
 
 Every setup answers those two questions differently, which is why I have four implementations and not one.
 
+```mermaid
+flowchart LR
+  ask["An AI tool is waiting for approval"]
+  subgraph det["Detection: differs per setup"]
+    d1["iTerm2<br/>read the pane's screen"]
+    d2["Ghostty<br/>the tool's permission hook"]
+    d3["T3 Code<br/>watch the app's local state"]
+    d4["Claude desktop<br/>the app's hook system"]
+  end
+  pop["Native macOS popup<br/>the same everywhere"]
+  subgraph rep["Reply: differs per setup"]
+    r1["iTerm2<br/>type the key into the pane"]
+    r2["Ghostty<br/>return a decision to the hook"]
+    r3["T3 Code<br/>answer through the app's local interface"]
+    r4["Claude desktop<br/>return a decision to the hook"]
+  end
+  ask --> d1 & d2 & d3 & d4
+  d1 & d2 & d3 & d4 --> pop
+  pop --> r1 & r2 & r3 & r4
+```
+
 ## The four setups
 
-| Setup | AI tools covered | Detection | Reply | What breaks it |
-|---|---|---|---|---|
-| Terminal with a scripting API (iTerm2) | Claude Code, Codex, Gemini CLI | Read each pane's screen and match the prompt text | Type the option's key into that pane | Any tool rewording its prompt |
-| Terminal without screen access (Ghostty) | Claude Code | The tool's own permission hook | Return a decision to the hook as JSON | Still a prototype; only as wide as the tools that offer such a hook |
-| Desktop app that runs several models (T3 Code) | Whatever the app runs | Watch the app's local state for pending requests | Answer through the app's local interface | The app changing its internals |
-| Claude desktop app | Claude | The app's hook system, packaged as a mod | Return a decision to the hook | Changes to the hook contract |
+| Setup | AI tools covered | Detection | Reply |
+|---|---|---|---|
+| Terminal with a scripting API (iTerm2) | Claude Code, Codex, Gemini CLI | Read each pane's screen, match the prompt text | Type the option's key into that pane |
+| Terminal without screen access (Ghostty) | Claude Code | The tool's own permission hook | Return a decision to the hook |
+| Desktop app that runs several models (T3 Code) | Whatever the app runs | Watch the app's local state | Answer through the app's local interface |
+| Claude desktop app | Claude | The app's hook system, packaged as a mod | Return a decision to the hook |
 
-The Claude desktop version is this repository; see the [README](../README.md). The other three are described here as approach only. This plugin does not support those tools.
+> [!NOTE]
+> The Claude desktop version is this repository; see the [README](../README.md). The other three are described here as approach only. This plugin does not support those tools.
 
 ## What I learned
 
@@ -67,4 +89,5 @@ The order matters. Each step down is more work to maintain than the one above it
 
 ## Status
 
-These are notes on what I tried, not a maintained tool. The environments above change, and details here will go out of date.
+> [!WARNING]
+> These are notes on what I tried, not a maintained tool. The environments above change, and details here will go out of date.

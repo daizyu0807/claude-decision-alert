@@ -17,16 +17,38 @@ AI 寫程式工具在執行指令或修改檔案前會停下來問。同時開�
 
 每種情境對這兩個問題的答案都不同，所以我手上是四套實作，不是一套。
 
+```mermaid
+flowchart LR
+  ask["AI 工具在等待核准"]
+  subgraph det["偵測：每種情境不同"]
+    d1["iTerm2<br/>讀分頁畫面"]
+    d2["Ghostty<br/>工具的權限 hook"]
+    d3["T3 Code<br/>監看 App 的本機狀態"]
+    d4["Claude 桌面版<br/>App 的 hook 機制"]
+  end
+  pop["macOS 原生彈窗<br/>到哪裡都一樣"]
+  subgraph rep["回傳：每種情境不同"]
+    r1["iTerm2<br/>對分頁送出按鍵"]
+    r2["Ghostty<br/>把決定回傳給 hook"]
+    r3["T3 Code<br/>透過 App 的本機介面回覆"]
+    r4["Claude 桌面版<br/>把決定回傳給 hook"]
+  end
+  ask --> d1 & d2 & d3 & d4
+  d1 & d2 & d3 & d4 --> pop
+  pop --> r1 & r2 & r3 & r4
+```
+
 ## 四種使用情境
 
-| 使用情境 | 涵蓋的 AI 工具 | 偵測 | 回傳 | 什麼會讓它失效 |
-|---|---|---|---|---|
-| 有腳本 API 的終端機（iTerm2） | Claude Code、Codex、Gemini CLI | 讀每個分頁的畫面，比對提示文字 | 對該分頁送出選項的按鍵 | 任何一個工具改了提示文案 |
-| 讀不到畫面的終端機（Ghostty） | Claude Code | 工具自己的權限 hook | 以 JSON 把決定回傳給 hook | 仍是原型；涵蓋範圍取決於有哪些工具提供這種 hook |
-| 可執行多家模型的桌面 App（T3 Code） | App 裡執行的各家模型 | 監看 App 的本機狀態，找出待處理的請求 | 透過 App 的本機介面回覆 | App 改了內部結構 |
-| Claude 桌面版 | Claude | App 的 hook 機制，包成 mod | 把決定回傳給 hook | hook 的約定有變動 |
+| 使用情境 | 涵蓋的 AI 工具 | 偵測 | 回傳 |
+|---|---|---|---|
+| 有腳本 API 的終端機（iTerm2） | Claude Code、Codex、Gemini CLI | 讀每個分頁的畫面，比對提示文字 | 對該分頁送出選項的按鍵 |
+| 讀不到畫面的終端機（Ghostty） | Claude Code | 工具自己的權限 hook | 把決定回傳給 hook |
+| 可執行多家模型的桌面 App（T3 Code） | App 裡執行的各家模型 | 監看 App 的本機狀態 | 透過 App 的本機介面回覆 |
+| Claude 桌面版 | Claude | App 的 hook 機制，包成 mod | 把決定回傳給 hook |
 
-Claude 桌面版的版本就是這個 repo，請看 [README](../README.md)。另外三個在這裡只描述做法，這個外掛並不支援那些工具。
+> [!NOTE]
+> Claude 桌面版的版本就是這個 repo，請看 [README](../README.md)。另外三個在這裡只描述做法，這個外掛並不支援那些工具。
 
 ## 學到的事
 
@@ -67,4 +89,5 @@ Claude 桌面版的版本就是這個 repo，請看 [README](../README.md)。另
 
 ## 狀態
 
-這是我試過哪些做法的筆記，不是有人維護的工具。上面這些環境會變，這裡的細節會過時。
+> [!WARNING]
+> 這是我試過哪些做法的筆記，不是有人維護的工具。上面這些環境會變，這裡的細節會過時。
