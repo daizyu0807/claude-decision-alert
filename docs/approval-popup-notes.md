@@ -1,4 +1,4 @@
-# Background: native approval popups for AI coding tools, four attempts
+# Background: native approval popups for AI coding tools, across four setups
 
 English | [繁體中文](approval-popup-notes.zh-TW.md)
 
@@ -6,20 +6,20 @@ AI coding tools stop and ask before they run a command or edit a file. When seve
 
 I wanted one thing: a native macOS window that appears on top of whatever I am doing, shows what is being asked, and sends my answer back to the session that asked.
 
-I ended up building it four times, once per environment. decision-alert is one of the four. This page explains why one version was not enough, and what I would do first if I started again. For the other three it describes the approach only, with no code.
+I ended up with four versions, one per setup. decision-alert is one of the four. This page explains why one version was not enough, and what I would do first if I started again. For the other three it describes the approach only, with no code.
 
 ## The short version
 
-The popup is the easy part and it is the same everywhere. What differs in every environment is the two ends:
+The popup is the easy part and it is the same everywhere. What differs in every setup is the two ends:
 
 1. **Detection.** How do you find out that a prompt is waiting?
 2. **Reply.** How do you send the answer back to the right session?
 
-Every environment answers those two questions differently, which is why I have four implementations and not one.
+Every setup answers those two questions differently, which is why I have four implementations and not one.
 
-## The four attempts
+## The four setups
 
-| Environment | AI tools covered | Detection | Reply | What breaks it |
+| Setup | AI tools covered | Detection | Reply | What breaks it |
 |---|---|---|---|---|
 | Terminal with a scripting API (iTerm2) | Claude Code, Codex, Gemini CLI | Read each pane's screen and match the prompt text | Type the option's key into that pane | Any tool rewording its prompt |
 | Terminal without screen access (Ghostty) | Claude Code | The tool's own permission hook | Return a decision to the hook as JSON | Still a prototype; only as wide as the tools that offer such a hook |
